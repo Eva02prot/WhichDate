@@ -32,7 +32,7 @@ public class SpriteInputRouter : MonoBehaviour
 
     private bool TryGetPointerDownScreenPos(out Vector2 screenPos)
     {
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_EDITOR || UNITY_STANDALONE || UNITY_WEBGL
         if (Input.GetMouseButtonDown(0))
         {
             screenPos = Input.mousePosition;

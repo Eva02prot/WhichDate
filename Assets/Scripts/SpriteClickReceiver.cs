@@ -1,45 +1,76 @@
 using DG.Tweening;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
+
 public class SpriteClickReceiver : MonoBehaviour, ISpriteClickable { 
-    [Header("Debug")][SerializeField] 
-    private bool logClick = true; 
-    [Header("Switch GameObjects")][SerializeField] 
-    private List<GameObject> targets = new List<GameObject>(); 
+    [Header("Debug")][SerializeField]
+    private bool logClick = true;
+
+    [Header("Switch GameObjects")][SerializeField]
+    private List<GameObject> targets = new List<GameObject>();
+
     [SerializeField] 
-    private bool loop = true; 
+    private bool loop = true;
+
     [SerializeField] 
-    private int startIndex = 0; 
-    [Header("Optional")][SerializeField] private bool initializeOnAwake = true; 
-    [SerializeField] private int currentIndex = -1; 
-    private GameObject mCurrentObj; 
+    private int startIndex = 0;
+
+    [Header("Optional")][SerializeField]
+    private bool initializeOnAwake = true;
+
+    [Header("Callbacks")]
+    [SerializeField] private UnityEvent onClick;
+
+    [SerializeField]
+    private int currentIndex = -1;
+
+    private GameObject mCurrentObj;
+
     private DOTweenAnimation mAnimator;
 
-    private void Awake() { 
-        if (initializeOnAwake) { 
+    private void Awake() 
+    { 
+        if (initializeOnAwake) 
+        { 
             Initialize(startIndex); 
         }
-    } 
-    public void OnSpriteClick(Vector2 worldPos) {
-        if (logClick) { 
-            Debug.Log($"SpriteClickReceiver Clicked: {name}", this); 
-        } 
-        mCurrentObj = targets[currentIndex];
-        mAnimator = mCurrentObj.GetComponent<DOTweenAnimation>();
-        if (mAnimator) 
-            mAnimator.DOPlay();
     }
 
-    public void Initialize(int index) {
+    public void OnSpriteClick(Vector2 worldPos)
+    {
+        if (logClick) 
+        {
+            Debug.Log($"SpriteClickReceiver Clicked: {name}", this); 
+        }
+
+        onClick?.Invoke();
+    }
+
+    public void Initialize(int index)
+    {
         if (targets == null || targets.Count == 0) {
             currentIndex = -1;
             return;
         }
+
         index = Mathf.Clamp(index, 0, targets.Count - 1);
-        currentIndex = index; ApplyVisible(currentIndex);
+
+        currentIndex = index;
+        ApplyVisible(currentIndex);
+
+        SaveCurrentData(gameObject.name, currentIndex);
     }
 
-    public void SwitchNext() {
+    public void PlayIndexAnimation() {
+        mCurrentObj = targets[currentIndex];
+        mAnimator = mCurrentObj.GetComponent<DOTweenAnimation>();
+        if (mAnimator)
+            mAnimator.DOPlay();
+    }
+
+    public void SwitchNext()
+    {
         if (mAnimator) 
             mAnimator.DOGotoAndPause(0f);
 
@@ -57,15 +88,27 @@ public class SpriteClickReceiver : MonoBehaviour, ISpriteClickable {
         } 
 
         currentIndex = next;
-        ApplyVisible(currentIndex); 
+        ApplyVisible(currentIndex);
+
+        SaveCurrentData(gameObject.name, currentIndex);
     } 
 
-    private void ApplyVisible(int visibleIndex) {
-        for (int i = 0; i < targets.Count; i++) {
+    private void ApplyVisible(int visibleIndex)
+    {
+        for (int i = 0; i < targets.Count; i++)
+        {
             GameObject go = targets[i];
             if (go == null) 
                 continue;
             go.SetActive(i == visibleIndex);
         } 
+    }
+
+    public void SaveCurrentData(string name, int index)
+    {
+        if (GameControllor.Instance == null)
+            return;
+
+        GameControllor.Instance.SetIndex(name, index);
     }
 }
