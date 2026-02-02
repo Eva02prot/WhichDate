@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ButtonToggleSwitcher : MonoBehaviour
+public class ButtonToggleSwitcher : ResettableBehaviour
 {
     public Button Button_TB;
     public Button Button_TF;
@@ -42,5 +42,10 @@ public class ButtonToggleSwitcher : MonoBehaviour
             Button_TF.gameObject.SetActive(!isActive);
             Button_TB.gameObject.SetActive(isActive);
         }
+    }
+
+    public override void Reset() {
+        Button_TB.gameObject.SetActive(isActive);
+        Button_TF.gameObject.SetActive(!isActive);
     }
 }
