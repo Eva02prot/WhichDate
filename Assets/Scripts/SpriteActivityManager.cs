@@ -2,9 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
-public class SpriteActivityManager : MonoBehaviour
+public class SpriteActivityManager : ResettableBehaviour
 {
+    public List<string> defaultActiveList;
     private struct ChildState
     {
         public Transform Child;
@@ -19,7 +21,8 @@ public class SpriteActivityManager : MonoBehaviour
 
         if (targetTrans != null)
         {
-            targetTrans.gameObject.SetActive(!targetTrans.gameObject.activeSelf);
+            bool isActive = !targetTrans.gameObject.activeSelf;
+            targetTrans.gameObject.SetActive(isActive);
         }
     }
 
@@ -81,9 +84,33 @@ public class SpriteActivityManager : MonoBehaviour
         }
     }
 
+    public void CloseAllChildren()
+    {
+        int count = transform.childCount;
+
+        for (int i = 0; i < count; ++i) { 
+            Transform child = transform.GetChild(i);
+            child.gameObject.SetActive(false);
+        }
+    }
+
     public void ClearSnapshot()
     {
         mSnapshot = null;
         mHasSnapshot = false;
+    }
+
+    public override void Reset()
+    {
+        CloseAllChildren();
+
+        foreach (var name in defaultActiveList)
+        {
+            var targetTrans = transform.Find(name);
+            if (targetTrans != null)
+            {
+                targetTrans.gameObject.SetActive(true);
+            }
+        }
     }
 }
