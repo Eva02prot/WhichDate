@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -10,6 +11,8 @@ public class GameControllor : MonoBehaviour
     public GameObject StageOne;
     public GameObject StageTwo;
 
+    public GameObject WinPage;
+
     public GameObject WinFace;
     public GameObject WinSlogan;
 
@@ -17,7 +20,6 @@ public class GameControllor : MonoBehaviour
 
     private bool StageOnePass = false;
     private bool StageTwoPass = false;
-    private bool StageThreePass = false;
 
     //[Header("Callbacks")]
     //[SerializeField] private UnityEvent onStageOnePass;
@@ -44,11 +46,14 @@ public class GameControllor : MonoBehaviour
     {
         if (!mGameData.isDirty) return;
 
-        var isPass = true;
+        var onePass = true;
+        var twoPass = true;
         foreach (var kv in mGameData.mIndexMap) {
-            isPass = isPass && ClothChecker(kv.Key, kv.Value);
+            onePass = onePass && ClothChecker(kv.Key, kv.Value);
+            twoPass = twoPass && DiaryNumberChecker(kv.Key, kv.Value);
         }
-        StageOnePass  = isPass;
+        StageOnePass  = onePass;
+        StageTwoPass = twoPass;
 
         if (StageOnePass)
         {
@@ -60,20 +65,24 @@ public class GameControllor : MonoBehaviour
             WinSlogan.SetActive(false);
         }
 
-            mGameData.isDirty = false;
+        if (StageOnePass && StageTwoPass)
+            WinGame();
+
+        mGameData.isDirty = false;
     }
 
     private void GameStart() {
         GameReset();
 
-        if (StageOne)
-            StageOne.SetActive(true);
-        if (StageTwo)
-            StageTwo.SetActive(false);
+        StageOne?.SetActive(true);
+        StageTwo?.SetActive(false);
     }
 
     public void GameReset(bool includeInactive = true)
     {
+        StageOne?.SetActive(false);
+        StageTwo?.SetActive(false);
+        WinPage?.SetActive(false);
         var items = Object.FindObjectsOfType<ResettableBehaviour>(includeInactive);
 
         for (int i = 0; i < items.Length; i++)
@@ -96,6 +105,36 @@ public class GameControllor : MonoBehaviour
                 break;
             case "Root_Neck":
                 if (index != 2)
+                    isPass = false;
+                break;
+            default:
+                break;
+        }
+        return isPass;
+    }
+
+    private bool DiaryNumberChecker(string name, int index) {
+        var isPass = true;
+        switch (name)
+        {
+            case "NumberBox":
+                if (index != 2)
+                    isPass = false;
+                break;
+            case "NumberBox1":
+                if (index != 3)
+                    isPass = false;
+                break;
+            case "NumberBox2":
+                if (index != 4)
+                    isPass = false;
+                break;
+            case "NumberBox3":
+                if (index != 5)
+                    isPass = false;
+                break;
+            case "NumberBox4":
+                if (index != 6)
                     isPass = false;
                 break;
             default:
@@ -133,9 +172,18 @@ public class GameControllor : MonoBehaviour
         if(!StageOnePass) 
             return;
         
-        if(StageOne)
-            StageOne.SetActive(false);
-        if(StageTwo)
-            StageTwo.SetActive(true);
+        StageOne?.SetActive(false);
+        StageTwo?.SetActive(true);
+    }
+
+    public void WinGame()
+    {
+        StageOne?.SetActive(false);
+        StageTwo?.SetActive(false);
+
+
+        WinPage?.SetActive(true);
+        var animControl = WinPage?.GetComponent<SpriteAnimController>();
+        animControl?.Play();
     }
 }

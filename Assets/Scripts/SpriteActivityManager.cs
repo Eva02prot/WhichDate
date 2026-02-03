@@ -26,6 +26,23 @@ public class SpriteActivityManager : ResettableBehaviour
         }
     }
 
+    public void SetActiveByName(string name) {
+        var targetTrans = transform.Find(name);
+        if (targetTrans != null)
+        {
+            targetTrans.gameObject.SetActive(true);
+        }
+    }
+
+    public void SetDisactiveByName(string name)
+    {
+        var targetTrans = transform.Find(name);
+        if (targetTrans != null)
+        {
+            targetTrans.gameObject.SetActive(false);
+        }
+    }
+
     public void ToggleActivityByName(string name)
     {
         SaveSnapshot();
