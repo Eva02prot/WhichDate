@@ -185,5 +185,7 @@ public class GameControllor : MonoBehaviour
         WinPage?.SetActive(true);
         var animControl = WinPage?.GetComponent<SpriteAnimController>();
         animControl?.Play();
+
+        AudioManager.Instance?.Play("tongguan_speak");
     }
 }
